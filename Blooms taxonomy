@@ -1,0 +1,29 @@
+# Define the levels of Bloom's Taxonomy
+knowledge_levels = {
+    "Remembering": 1,
+    "Understanding": 2,
+    "Applying": 3,
+    "Analyzing": 4,
+    "Evaluating": 5,
+    "Creating": 6
+}
+
+# Define the hierarchical order of Bloom's Taxonomy
+hierarchical_order = {
+    1: ["Remembering"],
+    2: ["Understanding"],
+    3: ["Applying"],
+    4: ["Analyzing"],
+    5: ["Evaluating"],
+    6: ["Creating"]
+}
+
+# Define a function to print the hierarchical order of Bloom's Taxonomy
+def print_hierarchy(hierarchical_order, level=1, indent=0):
+    if level in hierarchical_order:
+        for knowledge_level in hierarchical_order[level]:
+            print(" " * indent + "- " + knowledge_level)
+            print_hierarchy(hierarchical_order, level=level+1, indent=indent+2)
+
+# Print the hierarchical order of Bloom's Taxonomy
+print_hierarchy(hierarchical_order)
