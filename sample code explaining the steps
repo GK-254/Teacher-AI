@@ -1,0 +1,55 @@
+import tensorflow as tf
+from tensorflow.keras.layers.experimental import preprocessing
+
+# Define the text dataset
+text_url = "https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt"
+text_path = tf.keras.utils.get_file("input.txt", text_url)
+text = open(text_path, "r").read()
+
+# Create a character-level tokenizer
+tokenizer = preprocessing.TextVectorization(
+    standardize=None,
+    split=None,
+    output_mode="int",
+    output_sequence_length=None,
+    max_tokens=None,
+    pad_to_max_tokens=False
+)
+tokenizer.adapt(text)
+
+# Convert the text to integer sequences
+sequences = tokenizer(text)
+
+# Define the RNN model
+model = tf.keras.Sequential([
+    tf.keras.layers.Embedding(input_dim=len(tokenizer.get_vocabulary()), output_dim=256),
+    tf.keras.layers.LSTM(256),
+    tf.keras.layers.Dense(len(tokenizer.get_vocabulary()))
+])
+
+# Compile the model
+model.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), optimizer="adam")
+
+# Train the model
+model.fit(sequences[:-1], sequences[1:], epochs=10)
+
+# Generate some historical text
+seed_text = "In the year of our Lord"
+generated_text = seed_text
+for i in range(1000):
+    # Convert the seed text to an integer sequence
+    seed_sequence = tokenizer(tf.constant([seed_text]))
+    # Predict the next character in the sequence
+    next_token_logits = model.predict(seed_sequence)[0][-1]
+    # Sample the next character from the logits
+    next_token = tf.random.categorical([next_token_logits], num_samples=1)[0][0].numpy()
+    # Convert the next token back to a character
+    next_char = tokenizer.get_vocabulary()[next_token]
+    # Append the next character to the generated text
+    generated_text += next_char
+    # Update the seed text
+    seed_text += next_char
+    seed_text = seed_text[1:]
+
+# Print the generated text
+print(generated_text)
